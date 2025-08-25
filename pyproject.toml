@@ -1,0 +1,61 @@
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"
+
+[project]
+name = "uv-cross-installer"
+version = "1.0.0"
+description = "Cross-platform installer for uv-based Python applications"
+readme = "README.md"
+license = "MIT"
+authors = [
+    {name = "Yilmaz Mustafa", email = "yilmaz@codesapien.net"},
+]
+classifiers = [
+    "Development Status :: 4 - Beta",
+    "Intended Audience :: Developers",
+    "License :: OSI Approved :: MIT License",
+    "Operating System :: OS Independent",
+    "Programming Language :: Python :: 3",
+    "Programming Language :: Python :: 3.9",
+    "Programming Language :: Python :: 3.10",
+    "Programming Language :: Python :: 3.11",
+    "Programming Language :: Python :: 3.12",
+    "Topic :: Software Development :: Build Tools",
+    "Topic :: System :: Installation/Setup",
+]
+keywords = ["installer", "uv", "cross-platform", "packaging", "deployment"]
+requires-python = ">=3.9"
+dependencies = [
+    "GitPython>=3.1.0",
+    "platformdirs>=3.0.0",
+    "winshell>=0.6; sys_platform == 'win32'",
+]
+
+[project.optional-dependencies]
+dev = [
+    "pytest>=7.0",
+    "black>=23.0",
+    "flake8>=6.0",
+]
+
+[project.urls]
+Homepage = "https://github.com/codesapienbe/uv-cross-installer"
+Repository = "https://github.com/codesapienbe/uv-cross-installer"
+Issues = "https://github.com/codesapienbe/uv-cross-installer/issues"
+
+[project.scripts]
+uv-install = "uv_cross_installer:main"
+
+[tool.hatch.build.targets.wheel]
+packages = ["src/uv_cross_installer"]
+
+[tool.black]
+line-length = 100
+target-version = ['py39']
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+python_files = ["test_*.py"]
+python_classes = ["Test*"]
+python_functions = ["test_*"]
