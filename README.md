@@ -39,15 +39,73 @@ uv pip install -e .
 
 ## Usage
 
+### GUI Installation Wizard (Recommended)
+
+Launch the modern GUI installation wizard:
+
+```bash
+uv-install-gui
+```
+
+Or use the CLI with GUI mode:
+```bash
+uv-install https://github.com/user/my-app.git MyApp --gui
+```
+
+**Features of the GUI Wizard:**
+- 🎨 Modern, professional interface with step-by-step guidance
+- 📋 System requirements verification with detailed feedback
+- 📁 Interactive directory selection with disk space validation
+- ⚙️ Customizable installation options (shortcuts, PATH integration)
+- 📊 Real-time progress tracking with detailed logs
+- ✅ Installation confirmation with comprehensive summary
+- 🛡️ Security validation with user-friendly error messages
+
 ### Command Line Interface
 
 ```bash
-uv-install <repository-url> <app-name> [--python-version <version>]
+uv-install <repository-url> <app-name> [options]
 ```
 
-Example:
+**Options:**
+- `--python-version <version>`: Minimum Python version (default: 3.9)
+- `--gui`: Launch graphical installation wizard
+- `--install-dir <path>`: Custom installation directory
+- `--no-shortcuts`: Skip creating desktop shortcuts
+- `--log-level <level>`: Set logging level (DEBUG, INFO, WARN, ERROR)
+- `--correlation-id <id>`: Custom correlation ID for tracking
+
+**Examples:**
 ```bash
-uv-install https://github.com/user/my-app.git MyApp --python-version 3.9
+# Basic installation
+uv-install https://github.com/user/my-app.git MyApp
+
+# GUI installation with custom Python version
+uv-install https://github.com/user/my-app.git MyApp --python-version 3.11 --gui
+
+# CLI installation with custom directory
+uv-install https://github.com/user/my-app.git MyApp --install-dir /opt/myapp --no-shortcuts
+
+# Installation with detailed logging
+uv-install https://github.com/user/my-app.git MyApp --log-level DEBUG
+```
+
+### Interactive Mode
+
+When running in a terminal, the installer will prompt for confirmation:
+
+```bash
+$ uv-install https://github.com/user/my-app.git MyApp
+
+MyApp Installation
+==================================================
+Repository: https://github.com/user/my-app.git
+Install Directory: /home/user/.local/share/MyApp
+Python Version: 3.9+
+Create Shortcuts: Yes
+==================================================
+
+Proceed with installation? [Y/n]: 
 ```
 
 ### Programmatic Usage
@@ -55,6 +113,7 @@ uv-install https://github.com/user/my-app.git MyApp --python-version 3.9
 ```python
 from uv_cross_installer import CrossPlatformInstaller
 
+# Basic usage
 installer = CrossPlatformInstaller(
     repo_url="https://github.com/user/my-app.git",
     app_name="MyApp",
@@ -62,7 +121,38 @@ installer = CrossPlatformInstaller(
 )
 
 success = installer.install()
+
+# Advanced usage with correlation tracking
+installer = CrossPlatformInstaller(
+    repo_url="https://github.com/user/my-app.git",
+    app_name="MyApp",
+    python_version="3.9",
+    correlation_id="install-session-123"
+)
+
+# Custom installation directory
+installer.install_dir = Path("/opt/myapp")
+
+success = installer.install()
 ```
+
+### GUI Launcher
+
+For end-users, the GUI launcher provides the easiest way to install applications:
+
+```python
+from uv_cross_installer.launcher import InstallerLauncher
+
+launcher = InstallerLauncher()
+launcher.run()
+```
+
+The launcher provides:
+- Repository URL validation and auto-completion
+- Application name auto-filling from repository
+- Python version selection
+- Installation mode choice (GUI/CLI)
+- Real-time input validation
 
 ## Development
 

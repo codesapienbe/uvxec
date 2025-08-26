@@ -1035,6 +1035,9 @@ def main():
     parser.add_argument("--correlation-id", help="Correlation ID for tracking")
     parser.add_argument("--log-level", choices=['DEBUG', 'INFO', 'WARN', 'ERROR'], 
                        default='INFO', help="Logging level")
+    parser.add_argument("--gui", action="store_true", help="Launch graphical installation wizard")
+    parser.add_argument("--install-dir", help="Custom installation directory")
+    parser.add_argument("--no-shortcuts", action="store_true", help="Skip creating shortcuts")
     
     args = parser.parse_args()
     
@@ -1042,12 +1045,59 @@ def main():
     logging.getLogger('uv_cross_installer').setLevel(getattr(logging, args.log_level))
     
     try:
+        if args.gui:
+            # Launch GUI wizard
+            try:
+                from .gui import create_installation_wizard
+                create_installation_wizard(
+                    installer_class=CrossPlatformInstaller,
+                    repo_url=args.repo_url,
+                    app_name=args.app_name,
+                    python_version=args.python_version
+                )
+                sys.exit(0)
+            except ImportError as e:
+                print(f"GUI mode not available: {e}", file=sys.stderr)
+                print("Falling back to command-line mode...", file=sys.stderr)
+                # Fall through to command-line mode
+        
+        # Command-line installation
         installer = CrossPlatformInstaller(
             repo_url=args.repo_url,
             app_name=args.app_name,
             python_version=args.python_version,
             correlation_id=args.correlation_id
         )
+        
+        # Apply command-line options
+        if args.install_dir:
+            try:
+                SecurityValidator.validate_install_path(Path(args.install_dir))
+                installer.install_dir = Path(args.install_dir)
+            except (ValidationError, SecurityError) as e:
+                print(f"Invalid install directory: {e}", file=sys.stderr)
+                sys.exit(2)
+        
+        # Override shortcut creation if requested
+        if args.no_shortcuts:
+            installer._create_shortcuts_original = installer.create_shortcuts
+            installer.create_shortcuts = lambda: True  # Skip shortcuts
+        
+        # Show installation summary
+        print(f"\n{installer.app_name} Installation")
+        print("=" * 50)
+        print(f"Repository: {installer.repo_url}")
+        print(f"Install Directory: {installer.install_dir}")
+        print(f"Python Version: {installer.python_version}+")
+        print(f"Create Shortcuts: {'No' if args.no_shortcuts else 'Yes'}")
+        print("=" * 50)
+        
+        # Ask for confirmation in interactive mode
+        if sys.stdin.isatty():
+            response = input("\nProceed with installation? [Y/n]: ").strip().lower()
+            if response and response not in ['y', 'yes']:
+                print("Installation cancelled by user.")
+                sys.exit(0)
         
         success = installer.install()
         sys.exit(0 if success else 1)
@@ -1056,7 +1106,7 @@ def main():
         print(f"Validation/Security Error: {e}", file=sys.stderr)
         sys.exit(2)
     except KeyboardInterrupt:
-        print("Installation cancelled by user", file=sys.stderr)
+        print("\nInstallation cancelled by user", file=sys.stderr)
         sys.exit(130)
     except Exception as e:
         print(f"Unexpected error: {e}", file=sys.stderr)

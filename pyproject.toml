@@ -50,6 +50,7 @@ Issues = "https://github.com/codesapienbe/uv-cross-installer/issues"
 
 [project.scripts]
 uv-install = "uv_cross_installer:main"
+uv-install-gui = "uv_cross_installer.launcher:main"
 
 [tool.hatch.build.targets.wheel]
 packages = ["src/uv_cross_installer"]
